@@ -7,9 +7,7 @@
 #!pip install --upgrade transformers accelerate gradio easyocr --quiet
 #!pip install --upgrade gradio
 
-# ==============================
-# 1. Import Libraries
-# ==============================
+# Import Libraries
 import gradio as gr
 import easyocr
 import torch
@@ -19,9 +17,7 @@ from PIL import Image
 from transformers import AutoTokenizer, AutoModelForCausalLM
 
 
-# ==============================
-# 2. Force Device Separation
-# ==============================
+# Force Device Separation
 
 # OCR → CPU
 reader = easyocr.Reader(['en', 'bn'], gpu=False)
@@ -30,9 +26,8 @@ reader = easyocr.Reader(['en', 'bn'], gpu=False)
 #device = "cuda" if torch.cuda.is_available() else "cpu"
 device = "cpu"
 
-# ==============================
-# 3. Load Qwen LLM
-# ==============================
+# Load Qwen LLM
+
 tokenizer = AutoTokenizer.from_pretrained(
     "Qwen/Qwen2.5-3B-Instruct"
 )
@@ -49,9 +44,7 @@ print("OCR running on CPU")
 print("LLM running on:", model.device)
 
 
-# ==============================
-# 4. Image Preprocessing
-# ==============================
+# Image Preprocessing
 def preprocess_image(image):
 
     img = np.array(image)
@@ -75,9 +68,7 @@ def preprocess_image(image):
     return gray, thresh, img
 
 
-# ==============================
-# 5. Connected Component Boxing
-# ==============================
+# Connected Component Boxing
 def connected_components_boxes(thresh_img, original_img):
 
     # Morphology → group characters into words
@@ -114,9 +105,7 @@ def connected_components_boxes(thresh_img, original_img):
     return boxed_img
 
 
-# ==============================
-# 6. OCR Function
-# ==============================
+# OCR Function
 def extract_text_easyocr(processed_img):
 
     results = reader.readtext(processed_img)
@@ -129,9 +118,7 @@ def extract_text_easyocr(processed_img):
     return "\n".join(extracted_lines)
 
 
-# ==============================
-# 7. LLM Extraction Function
-# ==============================
+# LLM Extraction Function
 def extract_nid_info_with_llm(ocr_text):
 
     messages = [
@@ -190,9 +177,7 @@ OCR TEXT:
     return response
 
 
-# ==============================
-# 8. Full Pipeline
-# ==============================
+# Full Pipeline
 def process_nid(image):
 
     gray, thresh, original = preprocess_image(image)
@@ -208,9 +193,7 @@ def process_nid(image):
     return boxed_img, ocr_text, structured_info
 
 
-# ==============================
-# 9. Gradio UI
-# ==============================
+# Gradio UI
 interface = gr.Interface(
 
     fn=process_nid,
